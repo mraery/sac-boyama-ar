@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Hair Color Studio</string>
+    <string name="title_activity_main">Hair Color Studio</string>
+    <string name="package_name">com.sacboyama.studio</string>
+    <string name="custom_url_scheme">com.sacboyama.studio</string>
+</resources>

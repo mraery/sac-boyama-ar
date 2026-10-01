@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Hair Color AR Studio | Sanal Saç Boyama Deneyimi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-dark text-light select-none">
+  <div class="app-container">
+    <!-- Üst Bar (Header) -->
+    <header class="app-header glass">
+      <div class="brand">
+        <div class="logo-icon">✨</div>
+        <div class="brand-text">
+          <h1>Hair Color Studio</h1>
+          <span class="badge" id="ai-status">
+            <span class="status-dot pulsing"></span>
+            <span id="status-text">Yapay Zeka Yükleniyor...</span>
+          </span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <!-- APK İndir -->
+        <a href="/sac-boyama-studio.apk" download="sac-boyama-studio.apk" class="icon-btn" title="Android APK İndir" style="text-decoration:none; border-radius: var(--radius-md); padding: 8px 12px; background: rgba(34, 197, 94, 0.2); border-color: rgba(34, 197, 94, 0.4); color: #4ade80;">
+          <i data-lucide="download"></i>
+          <span class="btn-tip" style="color: #4ade80;">APK İndir</span>
+        </a>
+        <!-- Kamera Değiştir -->
+        <button id="btn-flip-camera" class="icon-btn" title="Kamerayı Değiştir" aria-label="Kamerayı Değiştir">
+          <i data-lucide="refresh-cw"></i>
+        </button>
+        <!-- Karşılaştır (Orijinal / Boyalı) -->
+        <button id="btn-compare" class="icon-btn" title="Basılı Tut: Orijinali Gör" aria-label="Orijinal Saçı Göster">
+          <i data-lucide="split"></i>
+          <span class="btn-tip">Karşılaştır</span>
+        </button>
+        <!-- Fotoğraf Çek -->
+        <button id="btn-snapshot" class="icon-btn primary" title="Fotoğrafı Kaydet" aria-label="Fotoğrafı Kaydet">
+          <i data-lucide="camera"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Kamera / Canlı Görüntü Alanı -->
+    <main class="viewport-area">
+      <!-- Gizli Video Kaynağı -->
+      <video id="webcam" playsinline autoplay muted></video>
+
+      <!-- İşleme ve Efekt Tuvali -->
+      <div class="canvas-wrapper">
+        <canvas id="output-canvas"></canvas>
+        <div id="compare-indicator" class="compare-badge hidden">Orijinal Saç</div>
+      </div>
+
+      <!-- Yükleme / İzin İsteme Ekranı -->
+      <div id="loading-overlay" class="overlay flex-center">
+        <div class="loading-card glass">
+          <div class="luxury-spinner"></div>
+          <h2 id="loading-title">Yapay Zeka Hazırlanıyor...</h2>
+          <p id="loading-desc">Kamera ve saç tespit modeli cihazınızda başlatılıyor (Sunucuya veri gitmez).</p>
+          <button id="btn-start-camera" class="cta-btn hidden">
+            <i data-lucide="video"></i> Kamerayı Başlat
+          </button>
+        </div>
+      </div>
+
+      <!-- Fotoğraf Çekildi Flash Efekti -->
+      <div id="flash-effect" class="flash-layer"></div>
+    </main>
+
+    <!-- Alt Kontrol Paneli (Renk Seçici ve Ayarlar) -->
+    <footer class="controls-panel glass">
+      <!-- Ayar Çubuğu (Yoğunluk & Modlar) -->
+      <div class="fine-tuning-bar">
+        <!-- Opaklık / Yoğunluk Slider -->
+        <div class="slider-group">
+          <label for="color-opacity">
+            <i data-lucide="sliders" class="small-icon"></i>
+            <span>Boya Yoğunluğu:</span>
+            <strong id="opacity-val">%75</strong>
+          </label>
+          <input type="range" id="color-opacity" min="20" max="100" value="75" step="5">
+        </div>
+
+        <!-- Boyama Modu Seçimi -->
+        <div class="blend-modes">
+          <button class="mode-chip active" data-mode="soft-light" title="Doğal gölge ve ışıltıyı korur">Doğal Işıltı</button>
+          <button class="mode-chip" data-mode="color" title="Belirgin ve canlı renk boyaması">Canlı Renk</button>
+          <button class="mode-chip" data-mode="multiply" title="Koyu ve yoğun kapatıcı etki">Yoğun Kapatıcı</button>
+        </div>
+      </div>
+
+      <!-- Kategori Sekmeleri -->
+      <div class="category-tabs" id="category-tabs">
+        <button class="tab-btn active" data-cat="all">Tüm Renkler</button>
+        <button class="tab-btn" data-cat="blonde">Sarı & Platin</button>
+        <button class="tab-btn" data-cat="red">Kızıl & Bakır</button>
+        <button class="tab-btn" data-cat="brown">Kahve & Kestane</button>
+        <button class="tab-btn" data-cat="fantasy">Pastel & Trend</button>
+        <button class="tab-btn" data-cat="custom">Özel Renk 🎨</button>
+      </div>
+
+      <!-- Renk Paleti Kaydırılabilir Liste -->
+      <div class="color-palette-scroll" id="palette-container">
+        <!-- Orijinal (Temizle) Seçeneği -->
+        <div class="color-swatch-item active" data-color="none">
+          <div class="swatch-circle none-circle">
+            <i data-lucide="slash"></i>
+          </div>
+          <span class="swatch-name">Doğal Saç</span>
+        </div>
+        <!-- Dinamik renkler JS ile eklenecek -->
+      </div>
+
+      <!-- Gizli Custom Color Picker Input -->
+      <input type="color" id="custom-color-picker" value="#C84B31" style="display: none;">
+    </footer>
+  </div>
+
+  <!-- Fotoğraf Önizleme Modal -->
+  <div id="snapshot-modal" class="modal-backdrop hidden">
+    <div class="modal-card glass">
+      <div class="modal-header">
+        <h3>Yeni Saç Renginiz! 📸</h3>
+        <button id="modal-close" class="close-btn"><i data-lucide="x"></i></button>
+      </div>
+      <div class="modal-body">
+        <img id="snapshot-preview" alt="Saç Rengi Önizleme" />
+      </div>
+      <div class="modal-footer">
+        <a id="btn-download" download="sac-rengim.png" class="cta-btn">
+          <i data-lucide="download"></i> Fotoğrafı İndir
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

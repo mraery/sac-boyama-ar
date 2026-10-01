@@ -1,0 +1,13 @@
+{
+  "appId": "com.sacboyama.studio",
+  "appName": "Hair Color Studio",
+  "webDir": "www",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https",
+    "cleartext": true
+  },
+  "android": {
+    "allowMixedContent": true
+  }
+}
